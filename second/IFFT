@@ -1,0 +1,39 @@
+
+S = zeros(1, 8);
+S(1) = 0;          % DC
+S(2) = 1 - 1i;     % 2Hz
+S(3) = -1 + 1i;    % 4Hz
+S(7) = 1 + 1i;     % -4Hz
+S(8) = -1 + 1i;    % -2Hz
+a = [1, -1, 1, -1];      % 第一份的a_n
+b = [1, 1, -1, 1];       % 第一份的 b_n
+fn = [-4, -2, 2, 4];     % 等效基頻 T=0.5s
+
+t = linspace(0, 1, 1000);
+m_It = zeros(size(t));
+m_Qt = zeros(size(t));
+for n = 1:length(fn)
+    m_It = m_It + (a(n) * cos(2*pi*fn(n)*t) - (b(n)) * sin(2*pi*fn(n)*t));
+    m_Qt = m_Qt + (a(n) * sin(2*pi*fn(n)*t) + (b(n)) * cos(2*pi*fn(n)*t));
+end
+
+samples = ifft(S) * length(S);
+%確認ifft有沒有正確
+fft_samples = fft(samples) / length(samples);
+disp(fft_samples);
+
+%設1秒
+t_discrete = (0:length(S)-1) / ( 2 * length(S));  % T=0.5
+
+figure;
+hold on;
+plot(t, m_It, 'r', 'LineWidth', 1.5);
+plot(t, m_Qt, 'b', 'LineWidth', 1.5);
+stem(t_discrete, real(samples), 'ro','linestyle','none', 'MarkerSize', 6, 'LineWidth', 2);
+stem(t_discrete, imag(samples), 'bo','linestyle','none', 'MarkerSize', 6, 'LineWidth', 2);
+xlabel('Time (s)');
+ylabel('Amplitude');
+legend('m_I(t)', 'm_Q(t)', 'IFFT Real (m_I取樣)', 'IFFT Imag (m_Q取樣)');
+title('IFFT輸出與基頻等效信號');
+grid on;
+hold off;
